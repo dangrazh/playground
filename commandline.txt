@@ -1,0 +1,12 @@
+./camtreader -f xml_camt053_test_data_small.xml -p c:/LocalData/xml_examples extract -t "AcctSvcrRef" "PgNb" "Ustrd"
+
+./camtreader -f xml_camt053_test_data_small.xml -p P:/Programming/Python/xml_examples  extract -t "AcctSvcrRef" "PgNb" "Ustrd"
+
+
+
+camtreader -f xml_camt053_test_data_large.xml -p c:/LocalData/xml_examples extract -t "AcctSvcrRef" "PgNb" "Ustrd"
+
+
+
+python parse_xml_camt053.py c:/LocalData/xml_examples xml_camt053_test_data_small.xml
+python parse_xml_camt053.py P:/Programming/Python/xml_examples xml_camt053_test_data_small.xml

@@ -1,0 +1,12 @@
+[package]
+name = "camtreader"
+# author = "Daniel Grass <dani.grass@bluewin.ch>"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.23"
+clap = { version = "4.0.32", features = ["derive"] }
+quick-xml = "0.22.0"
