@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use quick_xml::events::Event;
+use quick_xml::events::{BytesText, Event};
 use quick_xml::Reader;
 use std::ffi::{OsStr, OsString};
 use std::fs::{File, OpenOptions};
@@ -134,12 +134,12 @@ impl Parser<'_> {
 
         // The `Reader` does not implement `Iterator` because it outputs borrowed data (`Cow`s)
         loop {
-            match reader.read_event(&mut buf) {
+            match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) => {
                     // increase the tag count
                     no_of_tags += 1;
                     // get the element name
-                    elname = String::from_utf8_lossy(e.name()).to_string();
+                    elname = String::from_utf8_lossy(e.name().into_inner()).to_string();
                     // if elname is in list of provided tags, flag element for processing
                     for (idx, elem) in taglist.iter().enumerate() {
                         if elname.eq(elem) {
@@ -150,12 +150,28 @@ impl Parser<'_> {
                         }
                     }
                 }
-                Ok(Event::Text(ref e)) | Ok(Event::CData(ref e)) => {
+                Ok(Event::Text(ref e)) => {
                     // process the Tag Content
                     if process_tag {
                         let tag_value = e
-                            .unescape_and_decode(&reader)
-                            .unwrap_or("no text".to_string());
+                            .unescape()
+                            .unwrap_or(std::borrow::Cow::from("no text"))
+                            .to_string();
+
+                        // print!("adding value: {}", &tag_value);
+                        out_rec[tag_idx] = tag_value;
+                    }
+                }
+                Ok(Event::CData(e)) => {
+                    // process the Tag Content
+                    if process_tag {
+                        let tag_value = e
+                            .escape()
+                            .unwrap_or(BytesText::new("no text".as_ref()))
+                            .unescape()
+                            .unwrap_or(std::borrow::Cow::from("no text"))
+                            .to_string();
+
                         // print!("adding value: {}", &tag_value);
                         out_rec[tag_idx] = tag_value;
                     }
@@ -170,7 +186,7 @@ impl Parser<'_> {
                     // Tag End reached
 
                     // if we are closing a 'Ntry' tag, process the data
-                    let close_tag = String::from_utf8_lossy(e.name()).to_string();
+                    let close_tag = String::from_utf8_lossy(e.name().into_inner()).to_string();
                     if close_tag.eq(&ntry) {
                         no_of_ntry += 1;
                         let mut out_data = out_rec.join(";");
@@ -219,12 +235,15 @@ impl Parser<'_> {
 
         // The `Reader` does not implement `Iterator` because it outputs borrowed data (`Cow`s)
         loop {
-            match reader.read_event(&mut buf) {
+            match reader.read_event_into(&mut buf) {
                 Ok(Event::Start(ref e)) => {
                     // get the element name
-                    elname = String::from_utf8_lossy(e.name()).to_string();
+                    elname = String::from_utf8_lossy(e.name().into_inner()).to_string();
                 }
-                Ok(Event::Text(ref e)) | Ok(Event::CData(ref e)) => {
+                Ok(Event::Text(ref e)) => {
+                    // process the Tag Content
+                }
+                Ok(Event::CData(ref e)) => {
                     // process the Tag Content
                 }
                 Ok(Event::Empty(_e)) => {} //no need to process empty elements

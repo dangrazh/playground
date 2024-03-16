@@ -9,4 +9,4 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.23"
 clap = { version = "4.0.32", features = ["derive"] }
-quick-xml = "0.22.0"
+quick-xml = "0.31.0"
