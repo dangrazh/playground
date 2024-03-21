@@ -177,8 +177,7 @@ impl Parser<'_> {
                     }
                 }
                 Ok(Event::Empty(_e)) => {} //no need to process empty elements
-                Ok(Event::Comment(_e)) => {} //no need to process empty elements
-                // Ok(Event::CData(_e)) => {}
+                Ok(Event::Comment(_e)) => {} //no need to process comment elements
                 Ok(Event::Decl(_e)) => {}
                 Ok(Event::PI(_e)) => {} //no need to process processing instructions
                 Ok(Event::DocType(_e)) => {}
@@ -230,8 +229,15 @@ impl Parser<'_> {
         let mut reader = Reader::from_str(xml);
         reader.trim_text(true);
 
+        let ntry: String = String::from("Ntry");
+
         let mut buf = Vec::new();
         let mut elname: String;
+
+        // allocate the buffer to hold the entrie ntry
+        // average ntry's are 1100 - 1300 characters, hence
+        // allocating an initial capacity of 2000 to the buffer
+        let ntry_buff = String::with_capacity(2000);
 
         // The `Reader` does not implement `Iterator` because it outputs borrowed data (`Cow`s)
         loop {
